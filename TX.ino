@@ -1,7 +1,7 @@
 //The data pin for the trainer input
 const int inputPin = A3;
 
-//The code is hard-coded for this number of channels. 
+//The code is hard-coded for this number of channels.
 //I should be able to detect this while decoding the PPM signal though
 const uint8_t channels = 6;
 
@@ -9,6 +9,8 @@ const uint8_t channels = 6;
 const int level = HIGH;
 
 int led = 13;
+
+unsigned int offset = 400;
 
 struct RC_Channel {
   unsigned int channel[channels];
@@ -20,7 +22,7 @@ void setup() {
   //Our wireless serial device is setup to 57.6k baud
   Serial.begin(57600);
   
-  pinMode(led, OUTPUT);     
+  pinMode(led, OUTPUT);
   digitalWrite(led, HIGH);
   pinMode(inputPin, INPUT);
 }
@@ -29,7 +31,7 @@ void setup() {
 void readTransmitter() {
  while(pulseIn(inputPin, level) < 5000);
   for (int i = 0; i < channels; ++i) {
-    rc.channel[i] = pulseIn(inputPin, level);
+    rc.channel[i] = pulseIn(inputPin, level) + offset;
   }
 }
 
@@ -54,6 +56,14 @@ void sendData() {
 void loop() {
 
   readTransmitter();
+  /*
+  for (int i = 0; i < channels; ++i) {
+    Serial.print("Channel ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.println(rc.channel[i]);
+  }
+  */
   sendData();
   
   //Reset our channel data so in the event a read of the PPM fails we turn things off
